@@ -1,21 +1,17 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
-import JoinRoom from "./routes/JoinRoom/Index";
-import Room from "./routes/Room/Index";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <JoinRoom />,
-  },
-  {
-    path: "/room/:roomId",
-    element: <Room />,
-  },
-]);
+import EditPage from "./components/EditPage";
+import Home from "./components/Home";
+import { Routes, Route } from "react-router-dom";
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/editor/:roomId" element={<EditPage />} />
+      </Routes>
+    </div>
+  );
 }
 
 export default App;
