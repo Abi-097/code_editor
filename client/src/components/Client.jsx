@@ -1,6 +1,7 @@
 import Avatar from "react-avatar";
 
-const Client = ({ username }) => {
+const Client = (props) => {
+  const { username } = props;
   return (
     <div className="d-flex align-items-center mb-3">
       <Avatar

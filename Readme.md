@@ -13,3 +13,8 @@ react-router-dom: used to navigate to other components
 socket.io-client: used to connect and communicate with real time.
 
 uuid: used to generate auto room id
+
+server:
+express
+
+socket.io

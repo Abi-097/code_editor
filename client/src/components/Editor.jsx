@@ -5,12 +5,13 @@ import CodeMirror from "codemirror";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/addon/edit/closetag";
 import "codemirror/addon/edit/closebrackets";
+import { ACTIONS } from "../Action";
 
-const Editor = () => {
+const Editor = ({ socketRef, roomId, onCodeChange }) => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    const init = async () => {
+    const initEditor = () => {
       const editor = CodeMirror.fromTextArea(
         document.getElementById("realtimeEditor"),
         {
@@ -23,24 +24,40 @@ const Editor = () => {
       );
       // for sync the code
       editorRef.current = editor;
-
       editor.setSize(null, "100%");
-      // editorRef.current.on("change", (instance, changes) => {
-      //   // console.log("changes", instance ,  changes );
-      //   const { origin } = changes;
-      //   const code = instance.getValue(); // code has value which we write
-      //   // onCodeChange(code);
-      //   if (origin !== "setValue") {
-      //     socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-      //       roomId,
-      //       code,
-      //     });
-      //   }
-      // });
+
+      editorRef.current.on("change", (instance, changes) => {
+        const { origin } = changes;
+        const code = instance.getValue();
+        onCodeChange(code);
+        if (origin !== "setValue") {
+          socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+            roomId,
+            code,
+          });
+        }
+      });
     };
 
-    init();
-  }, []);
+    initEditor();
+  }, [onCodeChange, roomId, socketRef]);
+
+  // data receive from server
+  useEffect(() => {
+    if (socketRef.current) {
+      const handleCodeChange = ({ code }) => {
+        if (code !== null) {
+          editorRef.current.setValue(code);
+        }
+      };
+
+      socketRef.current.on(ACTIONS.CODE_CHANGE, handleCodeChange);
+
+      return () => {
+        socketRef.current.off(ACTIONS.CODE_CHANGE, handleCodeChange);
+      };
+    }
+  }, [socketRef]);
 
   return (
     <div style={{ height: "600px" }}>
