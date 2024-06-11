@@ -1,6 +1,65 @@
-import React from "react";
+import { useState } from "react";
+import { v4 as uuid } from "uuid";
+import toast from "react-hot-toast";
 import Logo from "../assets/Logo.png";
+import { useNavigate } from "react-router-dom";
 const Home = () => {
+  const [roomId, setRoomId] = useState("");
+  const [username, setUsername] = useState("");
+
+  const navigate = useNavigate();
+
+  const generateRoomId = (e) => {
+    e.preventDefault();
+    const Id = uuid();
+    setRoomId(Id);
+    toast.success("A room ID has been generated!", {
+      style: {
+        borderRadius: "10px",
+        background: "#80B9AD",
+        color: "#fff",
+        fontWeight: "bold",
+      },
+    });
+  };
+
+  const joinRoom = () => {
+    if (!roomId || !username) {
+      toast.error("Both fields are required", {
+        // icon: "🗙",
+        style: {
+          borderRadius: "10px",
+          background: "#FF8080",
+          color: "#fff",
+          fontWeight: "bold",
+        },
+      });
+      return;
+    }
+
+    // redirect
+    navigate(`/editor/${roomId}`, {
+      state: {
+        username,
+      },
+    });
+    toast.success("room is created", {
+      style: {
+        borderRadius: "10px",
+        background: "#80B9AD",
+        color: "#fff",
+        fontWeight: "bold",
+      },
+    });
+  };
+
+  // when enter then also join
+  const handleInputEnter = (e) => {
+    if (e.code === "Enter") {
+      joinRoom();
+    }
+  };
+
   return (
     <div className="container-fluid">
       <div className="row justify-content-center align-items-center min-vh-100">
@@ -18,25 +77,25 @@ const Home = () => {
               <div className="form-group">
                 <input
                   type="text"
-                  //   value={roomId}
-                  //   onChange={(e) => setRoomId(e.target.value)}
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value)}
                   className="form-control mb-2"
                   placeholder="ROOM ID"
-                  //   onKeyUp={handleInputEnter}
+                  onKeyUp={handleInputEnter}
                 />
               </div>
               <div className="form-group">
                 <input
                   type="text"
-                  //   value={username}
-                  //   onChange={(e) => setUsername(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="form-control mb-2"
                   placeholder="USERNAME"
-                  //   onKeyUp={handleInputEnter}
+                  onKeyUp={handleInputEnter}
                 />
               </div>
               <button
-                // onClick={joinRoom}
+                onClick={joinRoom}
                 className="btn btn-success btn-lg btn-block"
               >
                 JOIN
@@ -44,7 +103,7 @@ const Home = () => {
               <p className="mt-3 text-light">
                 Don&apos;t have a room ID? create
                 <span
-                  //   onClick={generateRoomId}
+                  onClick={generateRoomId}
                   className=" text-success p-1"
                   style={{ cursor: "pointer" }}
                 >
