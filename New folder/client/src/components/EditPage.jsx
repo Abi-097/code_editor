@@ -12,74 +12,66 @@ import {
 } from "react-router-dom";
 import { initSocket } from "../Socket";
 
-const EditPage = () => {
+function EditPage() {
   const [clients, setClients] = useState([]);
-  const [socket, setSocket] = useState(null);
   const codeRef = useRef(null);
-  // const socketRef = useRef(null);
+
   const Location = useLocation();
   const navigate = useNavigate();
   const { roomId } = useParams();
 
-  const handleErrors = (err) => {
-    console.log("Error", err);
-    toast.error("Socket connection failed, Try again later");
-    navigate("/");
-  };
-
+  const socketRef = useRef(null);
   useEffect(() => {
     const init = async () => {
-      try {
-        const socketURL = "http://localhost:5000"; // Specify your socket URL here
-        const socketInstance = await initSocket(socketURL);
-        setSocket(socketInstance);
+      socketRef.current = await initSocket();
+      socketRef.current.on("connect_error", (err) => handleErrors(err));
+      socketRef.current.on("connect_failed", (err) => handleErrors(err));
 
-        socketInstance.on("connect_error", (err) => handleErrors(err));
-        socketInstance.on("connect_failed", (err) => handleErrors(err));
+      const handleErrors = (err) => {
+        console.log("Error", err);
+        toast.error("Socket connection failed, Try again later");
+        navigate("/");
+      };
 
-        const handleErrors = (err) => {
-          console.log("Error", err);
-          toast.error("Socket connection failed, Try again later");
-          navigate("/");
-        };
+      socketRef.current.emit(ACTIONS.JOIN, {
+        roomId,
+        username: Location.state?.username,
+      });
 
-        socketInstance.emit(ACTIONS.JOIN, {
-          roomId,
-          username: Location.state?.username,
-        });
-
-        socketInstance.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
+      // Listen for new clients joining the chatroom
+      socketRef.current.on(
+        ACTIONS.JOINED,
+        ({ clients, username, socketId }) => {
+          // this insure that new user connected message do not display to that user itself
           if (username !== Location.state?.username) {
             toast.success(`${username} joined the room.`);
           }
           setClients(clients);
-          socketInstance.emit(ACTIONS.SYNC_CODE, {
+          // also send the code to sync
+          socketRef.current.emit(ACTIONS.SYNC_CODE, {
             code: codeRef.current,
             socketId,
           });
-        });
+        }
+      );
 
-        socketInstance.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
-          toast.success(`${username} left the room`);
-          setClients((prev) => {
-            return prev.filter((client) => client.socketId !== socketId);
-          });
+      // listening for disconnected
+      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
+        toast.success(`${username} left the room`);
+        setClients((prev) => {
+          return prev.filter((client) => client.socketId !== socketId);
         });
-      } catch (error) {
-        console.error(error);
-        handleErrors(error);
-      }
+      });
     };
-
     init();
 
-    // Cleanup
+    // cleanup
     return () => {
-      if (socket) {
-        socket.disconnect();
-      }
+      socketRef.current && socketRef.current.disconnect();
+      socketRef.current.off(ACTIONS.JOINED);
+      socketRef.current.off(ACTIONS.DISCONNECTED);
     };
-  }, [Location.state, navigate, roomId]);
+  }, []);
 
   if (!Location.state) {
     return <Navigate to="/" />;
@@ -88,10 +80,10 @@ const EditPage = () => {
   const copyRoomId = async () => {
     try {
       await navigator.clipboard.writeText(roomId);
-      toast.success(`roomId is copied`);
+      toast.success(`roomIs is copied`);
     } catch (error) {
       console.log(error);
-      toast.error("Unable to copy the room Id");
+      toast.error("unable to copy the room Id");
     }
   };
 
@@ -102,25 +94,30 @@ const EditPage = () => {
   return (
     <div className="container-fluid vh-100">
       <div className="row h-100">
+        {/* client panel */}
         <div
           className="col-md-2 bg-dark text-light d-flex flex-column h-100"
           style={{ boxShadow: "2px 0px 4px rgba(0, 0, 0, 0.1)" }}
         >
-          <img
-            src={Logo}
+          {/* <img
+            src="/images/codecast.png"
             alt="Logo"
             className="img-fluid mx-auto"
-            style={{ maxWidth: "80px" }}
-          />
-          <hr />
+            style={{ maxWidth: "150px", marginTop: "-43px" }}
+          /> */}
+          <hr style={{ marginTop: "-3rem" }} />
+
+          {/* Client list container */}
           <div className="d-flex flex-column flex-grow-1 overflow-auto">
-            <span className="mb-2 text-center">Members</span>
+            <span className="mb-2">Members</span>
             {clients.map((client) => (
               <Client key={client.socketId} username={client.username} />
             ))}
           </div>
+
           <hr />
-          <div className="mt-auto">
+          {/* Buttons */}
+          <div className="mt-auto ">
             <button className="btn btn-success" onClick={copyRoomId}>
               Copy Room ID
             </button>
@@ -128,14 +125,15 @@ const EditPage = () => {
               className="btn btn-danger mt-2 mb-2 px-3 btn-block"
               onClick={leaveRoom}
             >
-              Exit Room
+              Leave Room
             </button>
           </div>
         </div>
-        <div className="col-md-10 text-light d-flex flex-column h-100">
+
+        {/* Editor panel */}
+        <div className="col-md-10 text-light d-flex flex-column h-100 ">
           <Editor
-            // socketRef={socketRef}
-            socket={socket}
+            socketRef={socketRef}
             roomId={roomId}
             onCodeChange={(code) => {
               codeRef.current = code;
@@ -145,6 +143,6 @@ const EditPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default EditPage;

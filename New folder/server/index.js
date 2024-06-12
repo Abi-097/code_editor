@@ -5,24 +5,11 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const ACTIONS = require("./Action");
 
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Adjust this to match your client's origin
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
-
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
-});
+
+const io = new Server(server);
 
 const userSocketMap = {};
-
 const getAllConnectedClients = (roomId) => {
   return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
     (socketId) => {
@@ -36,12 +23,11 @@ const getAllConnectedClients = (roomId) => {
 
 io.on("connection", (socket) => {
   console.log("Socket connected", socket.id);
-
   socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
     userSocketMap[socket.id] = username;
     socket.join(roomId);
     const clients = getAllConnectedClients(roomId);
-    // Notify that a new user has joined
+    // notify that new user join
     clients.forEach(({ socketId }) => {
       io.to(socketId).emit(ACTIONS.JOINED, {
         clients,
@@ -51,19 +37,19 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Sync the code
+  // sync the code
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
     socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
   });
-
-  // When a new user joins the room, send all the code to that user's editor
+  // when new user join the room all the code which are there are also shows on that persons editor
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
-  // Handle disconnection
+  // leave room
   socket.on("disconnecting", () => {
     const rooms = [...socket.rooms];
+    // leave all the room
     rooms.forEach((roomId) => {
       socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
         socketId: socket.id,
@@ -77,4 +63,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server is runnint on port ${PORT}`));

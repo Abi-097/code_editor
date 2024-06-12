@@ -1,7 +1,7 @@
+import React from "react";
 import Avatar from "react-avatar";
 
-const Client = (props) => {
-  const { username } = props;
+function Client({ username }) {
   return (
     <div className="d-flex align-items-center mb-3">
       <Avatar
@@ -13,6 +13,6 @@ const Client = (props) => {
       <span className="mx-2">{username.toString()}</span>
     </div>
   );
-};
+}
 
 export default Client;

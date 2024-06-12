@@ -6,12 +6,10 @@ import "codemirror/addon/edit/closebrackets";
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror";
 import { ACTIONS } from "../Action";
-
-function Editor({ socket, roomId, onCodeChange }) {
+function Editor({ socketRef, roomId, onCodeChange }) {
   const editorRef = useRef(null);
-
   useEffect(() => {
-    const initEditor = () => {
+    const init = async () => {
       const editor = CodeMirror.fromTextArea(
         document.getElementById("realtimeEditor"),
         {
@@ -22,15 +20,17 @@ function Editor({ socket, roomId, onCodeChange }) {
           lineNumbers: true,
         }
       );
+      // for sync the code
       editorRef.current = editor;
+
       editor.setSize(null, "100%");
-      editor.on("change", (instance, changes) => {
+      editorRef.current.on("change", (instance, changes) => {
+        // console.log("changes", instance ,  changes );
         const { origin } = changes;
-        const code = instance.getValue();
+        const code = instance.getValue(); // code has value which we write
         onCodeChange(code);
-        if (origin !== "setValue" && socket && socket.current) {
-          // Emit code change to the server
-          socket.current.emit(ACTIONS.CODE_CHANGE, {
+        if (origin !== "setValue") {
+          socketRef.current.emit(ACTIONS.CODE_CHANGE, {
             roomId,
             code,
           });
@@ -38,27 +38,22 @@ function Editor({ socket, roomId, onCodeChange }) {
       });
     };
 
-    initEditor();
-  }, [onCodeChange, roomId, socket]);
+    init();
+  }, []);
 
+  // data receive from server
   useEffect(() => {
-    if (socket && socket.current) {
-      const handleCodeChange = ({ code }) => {
-        if (code !== null && editorRef.current) {
-          // Update code in the editor
+    if (socketRef.current) {
+      socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+        if (code !== null) {
           editorRef.current.setValue(code);
         }
-      };
-
-      // Listen for code changes from the server
-      socket.current.on(ACTIONS.CODE_CHANGE, handleCodeChange);
-
-      return () => {
-        // Clean up event listener
-        socket.current.off(ACTIONS.CODE_CHANGE, handleCodeChange);
-      };
+      });
     }
-  }, [socket]);
+    return () => {
+      socketRef.current.off(ACTIONS.CODE_CHANGE);
+    };
+  }, [socketRef.current]);
 
   return (
     <div style={{ height: "600px" }}>
