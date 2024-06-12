@@ -20,18 +20,10 @@ function addPropsToChildren(children, props) {
 }
 
 export default function SocketWrapper({ children }) {
-  // const socket = io.connect(
-  //   // process.env.REACT_APP_WEB_SOCKET_URL || "http://localhost:5000"
-  //   process.env.REACT_APP_WEB_SOCKET_URL ||
-  //     "https://code-editor-server-ochre.vercel.app"
-  // );
-  const socket = io(
-    process.env.REACT_APP_WEB_SOCKET_URL ||
-      "https://code-editor-server-ochre.vercel.app",
-    {
-      transports: ["websocket"],
-    }
+  const socket = io.connect(
+    process.env.REACT_APP_WEB_SOCKET_URL || "http://localhost:4500"
   );
+
   const location = useLocation();
   const navigate = useNavigate();
   const { roomId } = useParams();
@@ -42,23 +34,12 @@ export default function SocketWrapper({ children }) {
       toast.error("No username provided");
     }
 
-    if (location.state && location.state.username) {
-      socket.emit("when a user joins", {
-        roomId,
-        username: location.state.username,
-      });
-
-      socket.on("connect_error", (err) => {
-        console.error("Connection Error:", err);
-        toast.error("Connection failed. Please try again later.");
-      });
-    } else {
-      kickStrangerOut();
-    }
-
-    return () => {
-      socket.disconnect();
-    };
+    location.state && location.state.username
+      ? socket.emit("when a user joins", {
+          roomId,
+          username: location.state.username,
+        })
+      : kickStrangerOut();
   }, [socket, location.state, roomId, navigate]);
 
   return location.state && location.state.username ? (
