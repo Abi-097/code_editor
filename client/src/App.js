@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./App.css";
-import JoinRoom from "./routes/JoinRoom/Index";
-import Room from "./routes/Room/Index";
+import JoinRoom from "./routes/joinRoom/JoinRoom";
+import Room from "./routes/room/Room";
+import SocketWrapper from "./components/SocketWrapper";
 
 const router = createBrowserRouter([
   {
@@ -10,7 +10,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/room/:roomId",
-    element: <Room />,
+    element: (
+      <SocketWrapper>
+        <Room />
+      </SocketWrapper>
+    ),
   },
 ]);
 
