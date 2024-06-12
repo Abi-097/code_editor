@@ -11,13 +11,20 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/mode-golang";
-import "ace-builds/src-noconflict/mode-c_cpp";
+import "ace-builds/src-noconflict/mode-csharp";
 import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/mode-css";
 
 import "ace-builds/src-noconflict/keybinding-emacs";
 import "ace-builds/src-noconflict/keybinding-vim";
-
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/theme-tomorrow";
+import "ace-builds/src-noconflict/theme-kuroir";
+import "ace-builds/src-noconflict/theme-twilight";
+import "ace-builds/src-noconflict/theme-xcode";
+import "ace-builds/src-noconflict/theme-textmate";
+import "ace-builds/src-noconflict/theme-solarized_dark";
+import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/ext-searchbox";
@@ -27,11 +34,13 @@ export default function Room({ socket }) {
   const { roomId } = useParams();
   const [fetchedUsers, setFetchedUsers] = useState(() => []);
   const [fetchedCode, setFetchedCode] = useState(() => "");
-  const [language, setLanguage] = useState(() => "javascript");
+  const [language, setLanguage] = useState("javascript");
+  const [theme, setTheme] = useState("solarized_dark");
   const [codeKeybinding, setCodeKeybinding] = useState(() => undefined);
 
   const languagesAvailable = [
     "html",
+    "csharp",
     "javascript",
     "typescript",
     "python",
@@ -40,6 +49,18 @@ export default function Room({ socket }) {
     "yaml",
   ];
   const codeKeybindingsAvailable = ["default", "emacs", "vim"];
+
+  const themes = [
+    "monokai",
+    "github",
+    "tomorrow",
+    "kuroir",
+    "twilight",
+    "xcode",
+    "textmate",
+    "solarized_dark",
+    "solarized_light",
+  ];
 
   function onChange(newValue) {
     setFetchedCode(newValue);
@@ -52,7 +73,11 @@ export default function Room({ socket }) {
     socket.emit("update language", { roomId, languageUsed: e.target.value });
     socket.emit("syncing the language", { roomId: roomId });
   }
-
+  function handleThemeChange(e) {
+    setTheme(e.target.value);
+    socket.emit("update theme", { roomId, languageUsed: e.target.value });
+    socket.emit("syncing the theme", { roomId: roomId });
+  }
   function handleCodeKeybindingChange(e) {
     setCodeKeybinding(
       e.target.value === "default" ? undefined : e.target.value
@@ -149,6 +174,21 @@ export default function Room({ socket }) {
               </select>
             </div>
           </div>
+          <div className="languageFieldWrapper">
+            <select
+              className="languageField"
+              name="theme"
+              id="theme"
+              value={theme}
+              onChange={handleThemeChange}
+            >
+              {themes.map((eachTheme) => (
+                <option key={eachTheme} value={eachTheme}>
+                  {eachTheme}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <p style={{ fontWeight: "bold", marginTop: "10px" }}>Users Joined</p>
           <div className="roomSidebarUsers">
@@ -189,7 +229,7 @@ export default function Room({ socket }) {
         className="roomCodeEditor"
         mode={language}
         keyboardHandler={codeKeybinding}
-        theme="monokai"
+        theme={theme}
         name="collabEditor"
         width="auto"
         height="auto"
