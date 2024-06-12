@@ -33,11 +33,9 @@ async function getUsersinRoom(roomId, io) {
 }
 
 async function updateUserslistAndCodeMap(io, socket, roomId) {
-  socket
-    .in(roomId)
-    .emit("member left", {
-      username: socketID_to_Users_Map[socket.id].username,
-    });
+  socket.in(roomId).emit("member left", {
+    username: socketID_to_Users_Map[socket.id].username,
+  });
 
   // update the user list
   delete socketID_to_Users_Map[socket.id];
@@ -92,11 +90,9 @@ io.on("connection", function (socket) {
   // for user editing the code to reflect on his/her screen
   socket.on("syncing the language", ({ roomId }) => {
     if (roomId in roomID_to_Code_Map) {
-      socket
-        .in(roomId)
-        .emit("on language change", {
-          languageUsed: roomID_to_Code_Map[roomId].languageUsed,
-        });
+      socket.in(roomId).emit("on language change", {
+        languageUsed: roomID_to_Code_Map[roomId].languageUsed,
+      });
     }
   });
 
@@ -139,7 +135,7 @@ io.on("connection", function (socket) {
 
 //you can store your port number in a dotenv file, fetch it from there and store it in PORT
 //we have hard coded the port number here just for convenience
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3500;
 
 server.listen(PORT, function () {
   console.log(`listening on port : ${PORT}`);
