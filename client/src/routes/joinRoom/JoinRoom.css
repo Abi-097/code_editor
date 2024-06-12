@@ -1,5 +1,5 @@
 .joinBoxWrapper {
-  background-color: #fcfcfc;
+  background-color: #f0f0f0;
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -13,8 +13,8 @@
   gap: 15px;
   border: 2px solid rgb(237, 234, 234);
   border-radius: 10px;
-  box-shadow: 0 0 15px 15px rgb(235, 234, 234);
-  background-color: white;
+  box-shadow: 0 0 15px 15px rgb(180, 180, 180);
+  background-color: FFF7F1;
 }
 
 .joinBoxBtn {
@@ -37,7 +37,7 @@
 .joinBoxInput {
   padding: 10px 15px;
   border-radius: 5px;
-  background-color: #f0f0f0;
+  background-color: #eee2de;
   border: none;
   outline: none;
   font-weight: bold;
