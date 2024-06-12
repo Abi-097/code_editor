@@ -27,7 +27,10 @@ export default function SocketWrapper({ children }) {
   // );
   const socket = io(
     process.env.REACT_APP_WEB_SOCKET_URL ||
-      "https://code-editor-server-ochre.vercel.app"
+      "https://code-editor-server-ochre.vercel.app",
+    {
+      transports: ["websocket"],
+    }
   );
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,12 +42,23 @@ export default function SocketWrapper({ children }) {
       toast.error("No username provided");
     }
 
-    location.state && location.state.username
-      ? socket.emit("when a user joins", {
-          roomId,
-          username: location.state.username,
-        })
-      : kickStrangerOut();
+    if (location.state && location.state.username) {
+      socket.emit("when a user joins", {
+        roomId,
+        username: location.state.username,
+      });
+
+      socket.on("connect_error", (err) => {
+        console.error("Connection Error:", err);
+        toast.error("Connection failed. Please try again later.");
+      });
+    } else {
+      kickStrangerOut();
+    }
+
+    return () => {
+      socket.disconnect();
+    };
   }, [socket, location.state, roomId, navigate]);
 
   return location.state && location.state.username ? (
