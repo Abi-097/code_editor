@@ -1,74 +1,107 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { v4 as uuidv4, validate } from 'uuid';
-import { Toaster, toast } from 'react-hot-toast';
-import './JoinRoom.css'
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4, validate } from "uuid";
+import { Toaster, toast } from "react-hot-toast";
+import "./JoinRoom.css";
+import Logo from "../../Logo.png";
 export default function JoinRoom() {
-    const navigate = useNavigate()
-    const [roomId, setRoomId] = useState(() => "")
-    const [username, setUsername] = useState(() => "")
+  const navigate = useNavigate();
+  const [roomId, setRoomId] = useState(() => "");
+  const [username, setUsername] = useState(() => "");
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  function handleRoomSubmit(e) {
+    e.preventDefault();
+    setFormSubmitted(true);
 
-    function handleRoomSubmit(e) {
-        e.preventDefault()
-        if (!validate(roomId)) {
-            toast.error("Incorrect room ID")
-            return
-        }
-        username && navigate(`/room/${roomId}`, { state: { username } })
+    if (!roomId || !username) {
+      toast.error("Room ID and username are required", {
+        style: {
+          borderRadius: "10px",
+          background: "#FF6969",
+        },
+      });
+      return;
     }
 
-    function createRoomId(e) {
-        try {
-            setRoomId(uuidv4())
-            toast.success("Room created")
-        } catch (exp) {
-            console.error(exp)
-        }
+    if (!validate(roomId)) {
+      toast.error("Incorrect room ID", {
+        style: {
+          borderRadius: "10px",
+          background: "#FA7070",
+        },
+      });
+      return;
     }
+    username && navigate(`/room/${roomId}`, { state: { username } });
+  }
 
-    return (
-        <div className="joinBoxWrapper">
-            <form className="joinBox" onSubmit={handleRoomSubmit}>
-                <p>Paste your invitation code down below</p>
+  function createRoomId(e) {
+    try {
+      setRoomId(uuidv4());
+      toast.success("Room created", {
+        style: {
+          borderRadius: "10px",
+          background: "#6FEDD6",
+        },
+      });
+    } catch (exp) {
+      console.error(exp);
+    }
+  }
 
-                <div className="joinBoxInputWrapper">
-                    <input
-                        className="joinBoxInput"
-                        id="roomIdInput"
-                        type="text"
-                        placeholder="Enter room ID"
-                        required
-                        onChange={(e) => { setRoomId(e.target.value) }}
-                        value={roomId}
-                        autoSave="off"
-                        autoComplete="off"
-                    />
-                    <label htmlFor="roomIdInput" className="joinBoxWarning">{roomId ? '' : "Room ID required"}</label>
-                </div>
-
-                <div className="joinBoxInputWrapper">
-                    <input
-                        className="joinBoxInput"
-                        id="usernameInput"
-                        type="text"
-                        placeholder="Enter Guest Username"
-                        required
-                        value={username}
-                        onChange={e => { setUsername(e.target.value) }}
-                        autoSave="off"
-                        autoComplete="off"
-                    />
-                    <label htmlFor="usernameInput" className="joinBoxWarning">{username ? '' : "username required"}</label>
-                </div>
-
-                <button className="joinBoxBtn" type="submit">Join</button>
-                <p>Don't have an invite code? Create your <span
-                    style={{ textDecoration: "underline", cursor: "pointer" }}
-                    onClick={createRoomId}
-                >own room</span></p>
-            </form>
-            <Toaster />
+  return (
+    <div className="joinBoxWrapper">
+      <form className="joinBox" onSubmit={handleRoomSubmit}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <img src={Logo} alt="logo" width={75} height={75} />
         </div>
-    )
+        <p style={{ color: "#686D76", fontSize: "18px", fontWeight: "400" }}>
+          Paste your invitation code down below
+        </p>
+
+        <div className="joinBoxInputWrapper">
+          <input
+            className="joinBoxInput"
+            id="roomIdInput"
+            type="text"
+            placeholder="Enter room ID"
+            onChange={(e) => {
+              setRoomId(e.target.value);
+            }}
+            value={roomId}
+            required
+            autoSave="off"
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="joinBoxInputWrapper">
+          <input
+            className="joinBoxInput"
+            id="usernameInput"
+            type="text"
+            placeholder="Enter Guest Name"
+            value={username}
+            required
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
+            autoSave="off"
+            autoComplete="off"
+          />
+        </div>
+
+        <button className="joinBoxBtn" type="submit">
+          Lets Build
+        </button>
+        <p>
+          Don't have an invitation code? Create your{" "}
+          <span className="codeRoomLink" onClick={createRoomId}>
+            code room
+          </span>
+        </p>
+      </form>
+      <Toaster position="top-right" reverseOrder={false} />
+    </div>
+  );
 }
