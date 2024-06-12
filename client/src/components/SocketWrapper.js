@@ -21,7 +21,9 @@ function addPropsToChildren(children, props) {
 
 export default function SocketWrapper({ children }) {
   const socket = io.connect(
-    process.env.REACT_APP_WEB_SOCKET_URL || "http://localhost:5000"
+    // process.env.REACT_APP_WEB_SOCKET_URL || "http://localhost:5000"
+    process.env.REACT_APP_WEB_SOCKET_URL ||
+      "https://code-editor-server-ochre.vercel.app"
   );
 
   const location = useLocation();
