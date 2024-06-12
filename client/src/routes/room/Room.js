@@ -196,9 +196,13 @@ export default function Room({ socket }) {
               <div key={each} className="roomSidebarUsersEach">
                 <div
                   className="roomSidebarUsersEachAvatar"
-                  style={{ backgroundColor: `${generateColor(each)}` }}
+                  style={{
+                    backgroundColor: `${generateColor(each)}`,
+                    fontSize: "15px",
+                    fontWeight: "bold",
+                  }}
                 >
-                  {each.slice(0, 2).toUpperCase()}
+                  {each.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="roomSidebarUsersEachName">{each}</div>
               </div>
