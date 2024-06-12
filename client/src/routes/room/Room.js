@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { generateColor } from "../../utils";
 import "./Room.css";
 import Logo from "../../Logo.png";
+import { Door01Icon, Task01Icon } from "../../components/Icons";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/mode-python";
@@ -215,16 +216,29 @@ export default function Room({ socket }) {
           onClick={() => {
             copyToClipboard(roomId);
           }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+          }}
         >
-          Copy Room id
+          <Task01Icon style={{ marginRight: "5px", color: "white" }} /> Copy
+          Room id
         </button>
         <button
           className="roomSidebarBtn"
           onClick={() => {
             handleLeave();
           }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+          }}
         >
-          Leave
+          <Door01Icon style={{ marginRight: "5px", color: "white" }} /> Leave
         </button>
       </div>
 

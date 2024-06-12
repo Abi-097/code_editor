@@ -4,11 +4,13 @@ import { v4 as uuidv4, validate } from "uuid";
 import { Toaster, toast } from "react-hot-toast";
 import "./JoinRoom.css";
 import Logo from "../../Logo.png";
+import { BinaryCodeIcon } from "../../components/Icons";
 export default function JoinRoom() {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState(() => "");
   const [username, setUsername] = useState(() => "");
   const [formSubmitted, setFormSubmitted] = useState(false);
+
   function handleRoomSubmit(e) {
     e.preventDefault();
     setFormSubmitted(true);
@@ -55,9 +57,6 @@ export default function JoinRoom() {
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img src={Logo} alt="logo" width={75} height={75} />
         </div>
-        <p style={{ color: "#686D76", fontSize: "18px", fontWeight: "400" }}>
-          Paste your invitation code down below
-        </p>
 
         <div className="joinBoxInputWrapper">
           <input
@@ -91,13 +90,22 @@ export default function JoinRoom() {
           />
         </div>
 
-        <button className="joinBoxBtn" type="submit">
-          Lets Build
+        <button
+          className="joinBoxBtn"
+          type="submit"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+          }}
+        >
+          <BinaryCodeIcon style={{ marginRight: "5px" }} /> Lets Build
         </button>
         <p>
           Don't have an invitation code? Create your{" "}
           <span className="codeRoomLink" onClick={createRoomId}>
-            code room
+            Code Room
           </span>
         </p>
       </form>
